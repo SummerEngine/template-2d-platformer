@@ -90,6 +90,23 @@ color = Color(0.32, 0.42, 0.36, 1)
 polygon = PackedVector2Array(-100, 0, 100, 0, 100, 3, -100, 3)
 color = Color(0.42, 0.58, 0.46, 1)
 
+[node name="PlatHigh" type="StaticBody2D" parent="Geometry"]
+position = Vector2(200, 340)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Col" type="CollisionShape2D" parent="Geometry/PlatHigh"]
+position = Vector2(0, 8)
+shape = SubResource("plat")
+
+[node name="V" type="Polygon2D" parent="Geometry/PlatHigh"]
+polygon = PackedVector2Array(-100, 0, 100, 0, 100, 16, -100, 16)
+color = Color(0.32, 0.42, 0.36, 1)
+
+[node name="T" type="Polygon2D" parent="Geometry/PlatHigh"]
+polygon = PackedVector2Array(-100, 0, 100, 0, 100, 3, -100, 3)
+color = Color(0.42, 0.58, 0.46, 1)
+
 [node name="WallLeft" type="StaticBody2D" parent="Geometry"]
 position = Vector2(-16, 300)
 collision_layer = 1
@@ -134,6 +151,22 @@ door_id = "door_right"
 target_room_id = "room_03"
 target_door_id = "door_left"
 auto_enter = true
+
+[node name="DoorToRoom04" parent="Doors" instance=ExtResource("4_door")]
+position = Vector2(600, 580)
+door_id = "door_down"
+target_room_id = "room_04"
+target_door_id = "door_up"
+requires_ability = "dash"
+auto_enter = false
+
+[node name="DoorToRoom05" parent="Doors" instance=ExtResource("4_door")]
+position = Vector2(200, 340)
+door_id = "door_high"
+target_room_id = "room_05"
+target_door_id = "door_left"
+requires_ability = "wall_climb"
+auto_enter = false
 
 [node name="Elder" parent="." instance=ExtResource("10_npc")]
 position = Vector2(500, 500)

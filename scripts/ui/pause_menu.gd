@@ -3,6 +3,8 @@ extends CanvasLayer
 
 @onready var panel: Control = $PanelContainer
 @onready var resume_button: Button = $PanelContainer/VBoxContainer/ResumeButton
+@onready var journal_button: Button = $PanelContainer/VBoxContainer/JournalButton
+@onready var map_button: Button = $PanelContainer/VBoxContainer/MapButton
 @onready var restart_button: Button = $PanelContainer/VBoxContainer/RestartButton
 @onready var quit_button: Button = $PanelContainer/VBoxContainer/QuitButton
 
@@ -12,6 +14,8 @@ var _paused: bool = false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	resume_button.pressed.connect(_resume)
+	journal_button.pressed.connect(_open_journal)
+	map_button.pressed.connect(_open_map)
 	restart_button.pressed.connect(_restart)
 	quit_button.pressed.connect(_quit)
 	panel.visible = false
@@ -35,6 +39,22 @@ func _resume() -> void:
 	_paused = false
 	get_tree().paused = false
 	panel.visible = false
+
+
+func _open_journal() -> void:
+	panel.visible = false
+	var journal_scene: PackedScene = load("res://scenes/ui/quest_journal.tscn")
+	if journal_scene:
+		var journal := journal_scene.instantiate()
+		get_tree().current_scene.add_child(journal)
+
+
+func _open_map() -> void:
+	panel.visible = false
+	var map_scene: PackedScene = load("res://scenes/ui/map.tscn")
+	if map_scene:
+		var map := map_scene.instantiate()
+		get_tree().current_scene.add_child(map)
 
 
 func _restart() -> void:

@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/bosses/crystal_queen.gd" id="1_boss"]
+
+[sub_resource type="RectangleShape2D" id="sr_col"]
+size = Vector2(40, 50)
+
+[node name="CrystalQueen" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_boss")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -25)
+shape = SubResource("sr_col")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visuals"]
+polygon = PackedVector2Array(-20, -50, 0, -60, 20, -50, 25, -20, 20, 0, -20, 0, -25, -20)
+color = Color(0.5, 0.2, 0.65, 1)
+
+[node name="Crown" type="Polygon2D" parent="Visuals"]
+polygon = PackedVector2Array(-18, -50, -12, -68, -6, -55, 0, -72, 6, -55, 12, -68, 18, -50)
+color = Color(0.8, 0.5, 0.9, 1)
+
+[node name="Eyes" type="Polygon2D" parent="Visuals"]
+polygon = PackedVector2Array(-10, -40, -4, -40, -4, -34, -10, -34, 4, -40, 10, -40, 10, -34, 4, -34)
+color = Color(1, 0.3, 0.3, 1)
+
+[node name="CrystalLeft" type="Polygon2D" parent="Visuals"]
+polygon = PackedVector2Array(-25, -20, -35, -35, -28, -10)
+color = Color(0.6, 0.3, 0.8, 0.7)
+
+[node name="CrystalRight" type="Polygon2D" parent="Visuals"]
+polygon = PackedVector2Array(25, -20, 35, -35, 28, -10)
+color = Color(0.6, 0.3, 0.8, 0.7)
+
+[node name="HealthBarLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="HealthBarBg" type="ColorRect" parent="HealthBarLayer"]
+offset_left = 280
+offset_top = 16
+offset_right = 488
+offset_bottom = 32
+color = Color(0.15, 0.1, 0.2, 0.8)
+
+[node name="HealthBarFill" type="ColorRect" parent="HealthBarLayer/HealthBarBg"]
+offset_right = 200
+offset_bottom = 16
+color = Color(0.7, 0.2, 0.9, 1)
+
+[node name="BossName" type="Label" parent="HealthBarLayer"]
+offset_left = 280
+offset_top = 34
+offset_right = 488
+offset_bottom = 50
+text = "Crystal Queen"
+horizontal_alignment = 1

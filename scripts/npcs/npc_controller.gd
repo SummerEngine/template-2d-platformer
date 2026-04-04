@@ -5,6 +5,7 @@ extends CharacterBody2D
 @export var display_name: String = "Elder"
 @export var dialogue_file: String = "res://data/dialogue/elder.json"
 @export var body_color: Color = Color(0.4, 0.6, 0.3)
+@export var is_shopkeeper: bool = false
 
 @onready var visuals: Node2D = $Visuals
 @onready var prompt_label: Label = $PromptLabel
@@ -78,6 +79,11 @@ func _start_dialogue() -> void:
 func _end_dialogue() -> void:
 	_in_dialogue = false
 	EventBus.dialogue_ended.emit(npc_id)
+	if is_shopkeeper:
+		var shop_scene: PackedScene = load("res://scenes/ui/shop.tscn")
+		if shop_scene:
+			var shop := shop_scene.instantiate()
+			get_tree().current_scene.add_child(shop)
 	if _player_inside:
 		prompt_label.visible = true
 

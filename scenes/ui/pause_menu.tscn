@@ -37,6 +37,14 @@ custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 text = "Resume"
 
+[node name="JournalButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Journal"
+
+[node name="MapButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Map"
+
 [node name="RestartButton" type="Button" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
 text = "Restart Level"
