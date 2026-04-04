@@ -9,17 +9,38 @@ extends ParallaxBackground
 @export var mountain_color_near: Color = Color(0.2, 0.17, 0.28)
 ## 0 = trees (green), 1 = crystals (blue), 2 = pillars (red), -1 = none
 @export var decoration_type: int = 0
+## If set, uses this texture as the background instead of procedural generation.
+@export var background_texture: Texture2D = preload("res://assets/sprites/background.png")
+@export var background_parallax: float = 0.15
 
 var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	_rng.seed = 42
-	_create_star_layer()
-	_create_mountain_layer(0.1, mountain_color_far, -200, 120, 8)
-	_create_mountain_layer(0.25, mountain_color_near, -100, 180, 6)
-	if decoration_type >= 0:
-		_create_decoration_layer()
+	if background_texture:
+		_create_image_layer()
+	else:
+		_create_star_layer()
+		_create_mountain_layer(0.1, mountain_color_far, -200, 120, 8)
+		_create_mountain_layer(0.25, mountain_color_near, -100, 180, 6)
+		if decoration_type >= 0:
+			_create_decoration_layer()
+
+
+func _create_image_layer() -> void:
+	var layer := ParallaxLayer.new()
+	layer.motion_scale = Vector2(background_parallax, background_parallax)
+	add_child(layer)
+	var sprite := Sprite2D.new()
+	sprite.texture = background_texture
+	sprite.centered = false
+	sprite.position = Vector2(-400, -300)
+	# Scale to fill viewport
+	var tex_size: Vector2 = background_texture.get_size()
+	var target_size := Vector2(2400, 1200)
+	sprite.scale = target_size / tex_size
+	layer.add_child(sprite)
 
 
 func _create_star_layer() -> void:

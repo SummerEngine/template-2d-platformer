@@ -158,8 +158,8 @@ color = Color(0.35, 0.25, 0.5, 1)
 [node name="DoorToRoom01" parent="Doors" instance=ExtResource("4_door")]
 position = Vector2(50, 500)
 door_id = "door_left"
-target_room_id = "room_01"
-target_door_id = "door_high"
+target_room_id = "room_04"
+target_door_id = "door_left"
 auto_enter = true
 
 [node name="DoorToRoom06" parent="Doors" instance=ExtResource("4_door")]

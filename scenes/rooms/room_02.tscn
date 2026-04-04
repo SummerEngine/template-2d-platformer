@@ -98,6 +98,13 @@ target_room_id = "room_01"
 target_door_id = "door_left"
 auto_enter = true
 
+[node name="DoorToRoom04" parent="Doors" instance=ExtResource("5_door")]
+position = Vector2(50, 500)
+door_id = "door_left"
+target_room_id = "room_04"
+target_door_id = "door_up"
+auto_enter = true
+
 [node name="Enemies" type="Node2D" parent="."]
 
 [node name="Patrol1" parent="Enemies" instance=ExtResource("2_enemy")]

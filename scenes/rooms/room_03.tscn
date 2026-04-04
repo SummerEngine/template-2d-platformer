@@ -104,7 +104,7 @@ position = Vector2(950, 500)
 door_id = "door_right"
 target_room_id = "room_07"
 target_door_id = "door_left"
-requires_ability = "double_jump"
+requires_ability = ""
 auto_enter = false
 
 [node name="Enemies" type="Node2D" parent="."]

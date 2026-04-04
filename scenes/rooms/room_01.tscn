@@ -152,22 +152,6 @@ target_room_id = "room_03"
 target_door_id = "door_left"
 auto_enter = true
 
-[node name="DoorToRoom04" parent="Doors" instance=ExtResource("4_door")]
-position = Vector2(600, 580)
-door_id = "door_down"
-target_room_id = "room_04"
-target_door_id = "door_up"
-requires_ability = "dash"
-auto_enter = false
-
-[node name="DoorToRoom05" parent="Doors" instance=ExtResource("4_door")]
-position = Vector2(200, 340)
-door_id = "door_high"
-target_room_id = "room_05"
-target_door_id = "door_left"
-requires_ability = "wall_climb"
-auto_enter = false
-
 [node name="Elder" parent="." instance=ExtResource("10_npc")]
 position = Vector2(500, 500)
 npc_id = "elder"
