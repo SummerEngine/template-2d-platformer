@@ -65,6 +65,7 @@ var _invincibility_timer: float = 0.0
 var _is_dead: bool = false
 var _spawn_position: Vector2
 var _facing_right: bool = true
+var _run_time: float = 0.0  # For run animation
 
 # Double jump state
 var _air_jumps_left: int = 0
@@ -320,6 +321,17 @@ func _on_landed() -> void:
 func _update_squash_stretch(delta: float) -> void:
 	_visual_scale = _visual_scale.lerp(Vector2.ONE, squash_lerp_speed * delta)
 	visuals.scale = _visual_scale
+
+	# Run animation: bob + lean when moving on ground
+	var speed_ratio: float = absf(velocity.x) / max_speed
+	if is_on_floor() and speed_ratio > 0.2:
+		_run_time += delta * 14.0 * speed_ratio
+		visuals.position.y = sin(_run_time) * 2.5 * speed_ratio
+		visuals.rotation = sin(_run_time * 0.5) * 0.06 * speed_ratio
+	else:
+		_run_time = 0.0
+		visuals.position.y = lerpf(visuals.position.y, 0.0, 12.0 * delta)
+		visuals.rotation = lerpf(visuals.rotation, 0.0, 12.0 * delta)
 
 
 func _update_facing(input_x: float) -> void:

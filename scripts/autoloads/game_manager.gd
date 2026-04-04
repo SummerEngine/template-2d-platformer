@@ -84,6 +84,7 @@ func change_room(room_id: String, door_id: String) -> void:
 func start_game() -> void:
 	reset()
 	AbilityManager.reset()
+	AbilityManager.unlock("dash")  # Player starts with dash
 	QuestManager.reset()
 	RoomManager.reset()
 	RoomManager.change_room(DEFAULT_START_ROOM, DEFAULT_START_DOOR)
