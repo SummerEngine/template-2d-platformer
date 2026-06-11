@@ -1,0 +1,37 @@
+{
+  "id": "2d-platformer",
+  "version": "1.0.0",
+  "name": "2D Metroidvania Platformer",
+  "engineMinVersion": "0.5.36",
+  "entryScene": "res://scenes/ui/main_menu.tscn",
+  "dimension": "2D",
+  "mechanics": [
+    "2d-platformer-controller",
+    "double-jump",
+    "dash",
+    "wall-jump",
+    "wall-slide",
+    "melee-combat",
+    "ability-gates",
+    "ability-pickups",
+    "checkpoints",
+    "room-transitions",
+    "boss-fight",
+    "npc-dialogue",
+    "quests",
+    "shop",
+    "save-system"
+  ],
+  "genres": ["metroidvania", "platformer", "action-adventure"],
+  "agentBrief": "A complete Hollow Knight-style 2D metroidvania. PLAYER: scenes/player/player.tscn driven by scripts/player/player_controller.gd (CharacterBody2D: run, jump, double jump, dash, wall slide/jump, stomp-to-kill, melee attack; movement feel is tuned via @export vars — change those, not the physics code). ABILITIES: scripts/autoloads/ability_manager.gd gates dash/wall_climb/double_jump/down_attack/charged_attack behind pickups (scenes/systems/ability_pickup.tscn) and gates (scenes/systems/ability_gate.tscn). WORLD: 7 interconnected rooms in scenes/rooms/room_01-07.tscn managed by RoomManager + SceneTransition autoloads; also 3 linear levels in scenes/levels/. ENEMIES: patrol + flying enemies in scenes/enemies/, boss fight in scenes/bosses/crystal_queen.tscn. SYSTEMS: checkpoints/benches, coins/gems + shop (scenes/ui/shop.tscn), quests via QuestManager + quest_journal UI, saves via SaveManager, game-feel via JuiceManager (screenshake/squash). UI: full menu set in scenes/ui/ (main_menu, hud, pause, map, game_over, victory). INPUT ACTIONS (already bound): move_left, move_right, move_down, jump, dash, attack, interact, pause. AUTOLOADS (9, wired in project.godot): EventBus, AbilityManager, RoomManager, GameManager, QuestManager, SaveManager, SceneTransition, JuiceManager, AudioManager — extend these rather than adding parallel singletons. NOTE: run/main_scene is the main menu; gameplay starts via New Game -> room_01. CUSTOMIZE BY: reskinning sprites in assets/, retuning player @exports, editing room layouts, swapping enemy/boss behavior, retheming UI — do not rewrite the autoload spine.",
+  "userFacing": {
+    "tagline": "A complete Hollow Knight-style metroidvania: tight combat, ability gates, bosses, quests.",
+    "highlights": [
+      "Tuned platformer controller with double jump, dash, wall jump and stomp",
+      "Ability-gated exploration across 7 interconnected rooms",
+      "Boss fight, patrol + flying enemies, melee combat",
+      "Quests, shop, checkpoints and a full save system",
+      "Complete UI set: menu, HUD, map, pause, game over, victory"
+    ]
+  }
+}
