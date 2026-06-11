@@ -12,7 +12,7 @@ config_version=5
 
 config/name="2D Metroidvania Template"
 config/description="A Hollow Knight-inspired Metroidvania template with tight combat, ability-gated exploration, NPCs, quests, and boss fights. Built for Summer Engine."
-run/main_scene="res://scenes/ui/main_menu.tscn"
+run/main_scene="res://scenes/rooms/room_01.tscn"
 config/features=PackedStringArray("4.6")
 
 [autoload]
