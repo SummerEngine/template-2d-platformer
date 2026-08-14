@@ -38,10 +38,9 @@ func _create_image_layer() -> void:
 	add_child(canvas)
 	var rect := TextureRect.new()
 	rect.texture = background_texture
-	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	rect.size = Vector2(1920, 1080)
 	canvas.add_child(rect)
+	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _create_star_layer() -> void:
