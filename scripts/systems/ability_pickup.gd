@@ -76,10 +76,9 @@ func _show_acquired_overlay() -> void:
 
 	# Full-screen container so anchors work
 	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.size = Vector2(1920, 1080)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(root)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Dark backdrop
 	var backdrop := ColorRect.new()

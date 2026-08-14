@@ -1,6 +1,6 @@
 {
   "id": "2d-platformer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "name": "2D Metroidvania Platformer",
   "engineMinVersion": "0.5.36",
   "entryScene": "res://scenes/rooms/room_01.tscn",
