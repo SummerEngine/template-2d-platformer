@@ -1,6 +1,9 @@
 extends Control
 ## Main menu: New Game, Continue (if save exists), Quit.
 
+const RuntimeTexture := preload("res://scripts/systems/runtime_texture.gd")
+
+@onready var bg_image: TextureRect = $BgImage
 @onready var title_label: Label = $VBoxContainer/Title
 @onready var subtitle_label: Label = $VBoxContainer/Subtitle
 @onready var new_game_button: Button = $VBoxContainer/NewGameButton
@@ -9,6 +12,8 @@ extends Control
 
 
 func _ready() -> void:
+	# Loaded in code so the menu also works on a project that was never opened in the editor.
+	bg_image.texture = RuntimeTexture.load_texture("res://assets/sprites/menu_bg.png")
 	new_game_button.pressed.connect(_on_new_game)
 	continue_button.pressed.connect(_on_continue)
 	quit_button.pressed.connect(_on_quit)

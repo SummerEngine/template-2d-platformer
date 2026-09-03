@@ -40,6 +40,7 @@ The following systems are built and working. Study them before adding anything.
 - **Coin**, **Killzone** (the DeathPlane in every room), **CrumblingPlatform** (room_04), **MovingPlatform** (room_05), **FloatingText**.
 - **RoomLoader** -- Attach to the root of every room scene. Sets `room_id`, grants the starting dash on a fresh boot, spawns the player.
 - **ParallaxBg** -- Shows `assets/sprites/background.png` full-screen on a CanvasLayer behind the room (procedural stars / mountains / decorations only when no texture is set). Every room has one.
+- **RuntimeTexture** (`scripts/systems/runtime_texture.gd`) -- `static load_texture(path)`: the imported resource when the editor has imported the PNG, a direct decode of the source file otherwise. Used for both shipped backgrounds so a never-imported project still renders them.
 - Legacy, used only by `scenes/levels/`: **BouncePad**, **OneWayPlatform**, **Checkpoint**, **Gem**, **LevelEnd**.
 
 ### NPCs
@@ -124,6 +125,8 @@ RoomXX (Node2D, script=room_loader.gd, room_id="room_XX")
 - Groups for detection: `"player"`, `"enemies"`, `"doors"`, `"npcs"`
 - `has_method()` for duck typing instead of `is ClassName`, so systems stay decoupled and do not depend on class_name resolution
 - No external assets beyond the two background PNGs. Visuals are Polygon2D, CPUParticles2D and code-drawn shapes
+- PNG textures go through `RuntimeTexture.load_texture(path)`, never `load("res://*.png")` or a `Texture2D` ext_resource in a .tscn: a project that was created but never opened in the editor has no import cache, and the runtime cannot load un-imported PNGs (a scene with a missing ext_resource fails to load at all)
+- Scenes reference scripts by `path=` only, with no `uid=` attribute on `[ext_resource]`: the runtime resolves `uid://` through the editor-built `.godot/uid_cache.bin`, so a never-opened project logs a WARNING for every uid it meets
 - Event-driven: emit EventBus signals, listen in other systems. Never reference nodes directly across systems.
 - `process_mode = PROCESS_MODE_ALWAYS` on any node that must work during pause (UI, transitions)
 
@@ -135,7 +138,7 @@ Projects created with `summer create 2d-platformer <dir>` get `tests/autopilot/`
 bash tests/autopilot/run.sh
 ```
 
-That boots the game in the engine's offscreen verify mode (no editor window, real renderer), walks the player through two waypoints in room_01, saves frames to `tests/autopilot/out/`, and exits non-zero if the engine logged any ERROR or WARNING. A pristine project must exit 0 with `"errors_seen": []`. Agents can run the same probe through the `RunVerification` op (see `tests/autopilot/README.md`).
+That boots the game in the engine's offscreen verify mode (no editor window, real renderer), walks the player through two waypoints in room_01, saves frames to `tests/autopilot/out/`, and exits non-zero if the engine logged any ERROR or WARNING. A pristine project must exit 0 with `"errors_seen": []` -- including one that has never been opened in the editor (no `.godot/`, no `.import` files), which is the state `summer create` leaves behind. Agents can run the same probe through the `RunVerification` op (see `tests/autopilot/README.md`).
 
 Inside this template repository (which has no `tests/autopilot/`), the cheapest smoke test is a headless first frame; it prints every `_ready()` error and exits:
 

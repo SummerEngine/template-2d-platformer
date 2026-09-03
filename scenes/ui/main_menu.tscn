@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://xiht2k365c65"]
 
-[ext_resource type="Script" uid="uid://dhh5ikqpsmn5" path="res://scripts/ui/main_menu.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://dk5uf0ss6q46m" path="res://assets/sprites/menu_bg.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
 
 [node name="MainMenu" type="Control" unique_id=1003352186]
 layout_mode = 3
@@ -19,7 +18,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 

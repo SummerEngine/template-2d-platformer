@@ -13,6 +13,8 @@ extends ParallaxBackground
 @export var background_texture: Texture2D
 @export var background_parallax: float = 0.15
 
+const RuntimeTexture := preload("res://scripts/systems/runtime_texture.gd")
+
 var _rng := RandomNumberGenerator.new()
 
 
@@ -20,7 +22,7 @@ func _ready() -> void:
 	_rng.seed = 42
 	# Load game background if not set via export
 	if not background_texture:
-		background_texture = load("res://assets/sprites/background.png")
+		background_texture = RuntimeTexture.load_texture("res://assets/sprites/background.png")
 	if background_texture:
 		_create_image_layer()
 	else:

@@ -64,7 +64,7 @@ scripts/
   bosses/      CrystalQueen
   npcs/        NPCController, DialogueRunner
   systems/     Door, Bench, AbilityPickup, AbilityGate, Coin, Killzone, CrumblingPlatform,
-               MovingPlatform, RoomLoader, ParallaxBg, JuiceManager, FloatingText
+               MovingPlatform, RoomLoader, ParallaxBg, RuntimeTexture, JuiceManager, FloatingText
                (+ legacy BouncePad, OneWayPlatform, Checkpoint, Gem, LevelEnd)
   ui/          HUD, PauseMenu, QuestJournal, Map, Shop, MainMenu, GameOver
                (+ legacy LevelSelect, Victory, LevelComplete)
