@@ -1,76 +1,93 @@
 # 2D Metroidvania Template -- Agent Handoff
 
-You are building a Hollow Knight-inspired 2D Metroidvania template for Summer Engine (Godot 4.5 fork). This is an open-source game template that developers download and build on top of.
+You are working on a Hollow Knight-inspired 2D Metroidvania template for Summer Engine (a Godot 4.6+ fork). Developers create projects from it with `summer create 2d-platformer <dir>` and build on top of it. Everything below describes what actually ships in this repository. Check the files before you change anything, and keep this document true when you do.
+
+The game boots straight into gameplay: `run/main_scene` is `scenes/rooms/room_01.tscn`. The main menu is reached from the pause menu (`GameManager.go_to_main_menu()`), not at boot.
 
 ## What Exists (DO NOT REWRITE)
 
-The following systems are built and working. Study them before adding anything:
+The following systems are built and working. Study them before adding anything.
 
-### Core Architecture
-- **EventBus** (`scripts/autoloads/event_bus.gd`) -- Global signal bus. ALL cross-system communication goes through here. When adding new features, add signals here first.
-- **GameManager** (`scripts/autoloads/game_manager.gd`) -- HP system (hearts, not lives), coins, score, bench respawn, room transitions.
-- **RoomManager** (`scripts/autoloads/room_manager.gd`) -- Manages room transitions, player spawning at doors, visited room tracking. Room paths are registered in this file's `room_paths` dictionary.
-- **AbilityManager** (`scripts/autoloads/ability_manager.gd`) -- Tracks unlocked abilities (dash, wall_climb, double_jump). Player controller checks `AbilityManager.has_ability()` before allowing moves.
-- **QuestManager** (`scripts/autoloads/quest_manager.gd`) -- Loads quest JSON from `data/quests/`, tracks states (not_started/active/completed).
-- **SaveManager** (`scripts/autoloads/save_manager.gd`) -- JSON persistence to `user://save_data.json`. Saves abilities, rooms, quests, HP, coins, bench position.
+### Core Architecture (9 autoloads, wired in project.godot)
+- **EventBus** (`scripts/autoloads/event_bus.gd`) -- Global signal bus. ALL cross-system communication goes through here. When adding a feature, add its signals here first.
+- **AbilityManager** (`scripts/autoloads/ability_manager.gd`) -- Tracks unlocked abilities. `ALL_ABILITIES` = dash, wall_climb, double_jump, down_attack, charged_attack. The player controller checks `AbilityManager.has_ability()` before allowing a move. Dash is granted on a fresh boot (`scripts/systems/room_loader.gd`) and by `GameManager.start_game()`.
+- **RoomManager** (`scripts/autoloads/room_manager.gd`) -- Room transitions, player spawning at doors, visited-room tracking. All 7 rooms are registered in its `room_paths` dictionary.
+- **GameManager** (`scripts/autoloads/game_manager.gd`) -- HP system (hearts, not lives), coins, score, bench respawn, `start_game()`, `go_to_main_menu()`.
+- **QuestManager** (`scripts/autoloads/quest_manager.gd`) -- Loads `data/quests/*.json` (explore_grotto, fungal_harvest, defeat_queen), tracks not_started / active / completed.
+- **SaveManager** (`scripts/autoloads/save_manager.gd`) -- JSON persistence to `user://save_data.json`: abilities, visited rooms, quests, HP, coins, bench position.
 - **SceneTransition** (`scripts/autoloads/scene_transition.gd`) -- Fade-to-black between scenes. Use `SceneTransition.change_scene(path)` instead of `get_tree().change_scene_to_file()`.
-- **AudioManager** (`scripts/autoloads/audio_manager.gd`) -- Music crossfade + SFX pool with pitch variance. Stub only, no audio files yet.
+- **JuiceManager** (`scripts/systems/juice_manager.gd`) -- Floating text, stomp particles, dash afterimage, gem sparkles. Listens to EventBus.
+- **AudioManager** (`scripts/autoloads/audio_manager.gd`) -- Music crossfade + SFX pool with pitch variance. Stub: the calls are in place, no audio files ship (`assets/` holds two background PNGs and nothing else).
 
 ### Player
-- **PlayerController** (`scripts/player/player_controller.gd`) -- Full movement: walk, jump (coyote time, buffer, variable height, double jump), wall slide, wall jump, dash (8-directional, cooldown, iframes). All values are @export. Abilities gated by AbilityManager. Has `take_damage()`, `take_hit()`, `die()`, `respawn()`.
-- **PlayerCombat** (`scripts/combat/player_combat.gd`) -- Child node on Player. Sword swing with 3-hit combo, directional attacks (up/down/horizontal). Down-attack bounces player. Uses `body_entered` on SwordHitArea to detect enemies.
+- **PlayerController** (`scripts/player/player_controller.gd`) -- Full movement: walk, jump (coyote time, buffer, variable height, double jump), wall slide, wall jump, dash (8-directional, cooldown, iframes). All values are `@export`. Abilities gated by AbilityManager. Has `take_damage()`, `take_hit()`, `die()`, `respawn()`.
+- **PlayerCombat** (`scripts/combat/player_combat.gd`) -- Child node on Player. Sword swing with 3-hit combo, directional attacks (up/down/horizontal). Down-attack bounces the player. Uses `body_entered` on SwordHitArea to detect enemies.
 - **CameraController** (`scripts/player/camera_controller.gd`) -- Screen shake (decay-based) + hitstop (Engine.time_scale). Listens to EventBus signals.
-- **Player Scene** (`scenes/player/player.tscn`) -- CharacterBody2D with Visuals (Polygon2D body+eyes), StompDetector, Particles, PlayerCombat, Camera2D. Player is NOT placed in room scenes. RoomManager spawns it.
+- **Player Scene** (`scenes/player/player.tscn`) -- CharacterBody2D with Visuals (Polygon2D body + eyes), StompDetector, particles, PlayerCombat, Camera2D. The player is NOT placed in room scenes; RoomManager spawns it.
 
-### Enemies
-- **BaseEnemy** (`scripts/enemies/base_enemy.gd`) -- Base class. HP, contact_damage, gravity, knockback, coin drops, death particles, white flash on hit. Override `_ai_process(delta)` for custom behavior. Override `_setup()` for init.
-- **PatrolEnemy** (`scripts/enemies/patrol_enemy.gd`) -- Extends base_enemy via preload path. Walks back/forth, turns at edges/walls. Has PlayerDetector Area2D.
-- **FlyingEnemy** (`scripts/enemies/flying_enemy.gd`) -- Extends base_enemy. Sine-wave flight, wing flap animation.
-- Enemy scenes at `scenes/enemies/`. Collision layer 4 (Enemies), mask 1 (World).
+### Enemies and Boss
+- **BaseEnemy** (`scripts/enemies/base_enemy.gd`) -- Base class. HP, contact_damage, gravity, knockback, coin drops, death particles, white flash on hit. Override `_ai_process(delta)` for behaviour and `_setup()` for init.
+- **PatrolEnemy** (`scripts/enemies/patrol_enemy.gd`) -- Walks back and forth, turns at edges/walls. Has a PlayerDetector Area2D.
+- **FlyingEnemy** (`scripts/enemies/flying_enemy.gd`) -- Sine-wave flight, wing flap animation.
+- **CrystalQueen** (`scripts/bosses/crystal_queen.gd`, `scenes/bosses/crystal_queen.tscn`) -- Boss in room_06. Its own CharacterBody2D state machine (not base_enemy) with telegraphed attacks and a health bar on its own CanvasLayer (`HealthBarLayer/HealthBarBg/HealthBarFill`).
+- Enemy scenes live in `scenes/enemies/`. Collision layer 4 (Enemies), mask 1 (World).
 
-### Systems
-- **Door** (`scripts/systems/door.gd`, `scenes/doors/door.tscn`) -- Connects rooms. @export: door_id, target_room_id, target_door_id, requires_ability, auto_enter. Added to "doors" group.
-- **Bench** (`scripts/systems/bench.gd`, `scenes/systems/bench.tscn`) -- Save/heal point. Interact to heal full, save game, set respawn.
-- **AbilityPickup** (`scripts/systems/ability_pickup.gd`, `scenes/systems/ability_pickup.tscn`) -- Glowing orb. Interact to unlock ability permanently.
-- **AbilityGate** (`scripts/systems/ability_gate.gd`, `scenes/systems/ability_gate.tscn`) -- Wall that crumbles when you have the required ability.
-- **Coin** (`scripts/systems/coin.gd`), **Killzone**, **BouncePad**, **MovingPlatform**, **OneWayPlatform**, **CrumblingPlatform** -- All at `scripts/systems/`.
-- **RoomLoader** (`scripts/systems/room_loader.gd`) -- Attach to root of every room scene. Sets room_id and spawns the player.
-- **JuiceManager** (`scripts/systems/juice_manager.gd`) -- Floating text, stomp particles, dash afterimage, gem sparkles. Listens to EventBus.
-- **ParallaxBg** (`scripts/systems/parallax_bg.gd`) -- Procedural starfield + mountain silhouettes + themed decorations (trees/crystals/pillars via `decoration_type` export).
+### Systems (`scripts/systems/`)
+- **Door** (`scenes/doors/door.tscn`) -- Connects rooms. `@export`: door_id, target_room_id, target_door_id, requires_ability, locked, auto_enter. Group "doors". No shipped door sets `requires_ability` or `locked`.
+- **Bench** (`scenes/systems/bench.tscn`) -- Heal, save, set respawn point. Placed in room_01.
+- **AbilityPickup** (`scenes/systems/ability_pickup.tscn`) -- Glowing orb; interact to unlock an ability permanently and show a code-built "Ability Acquired!" overlay. Placed: dash in room_02, wall_climb in room_04.
+- **AbilityGate** (`scenes/systems/ability_gate.tscn`) -- Wall that crumbles when you own `required_ability`. Exists but is not placed in any room.
+- **Coin**, **Killzone** (the DeathPlane in every room), **CrumblingPlatform** (room_04), **MovingPlatform** (room_05), **FloatingText**.
+- **RoomLoader** -- Attach to the root of every room scene. Sets `room_id`, grants the starting dash on a fresh boot, spawns the player.
+- **ParallaxBg** -- Shows `assets/sprites/background.png` full-screen on a CanvasLayer behind the room (procedural stars / mountains / decorations only when no texture is set). Every room has one.
+- Legacy, used only by `scenes/levels/`: **BouncePad**, **OneWayPlatform**, **Checkpoint**, **Gem**, **LevelEnd**.
 
 ### NPCs
-- **NPC** (`scripts/npcs/npc_controller.gd`, `scenes/npcs/npc.tscn`) -- Interaction zone, loads dialogue from JSON, shows "E" prompt. @export: npc_id, dialogue_file, body_color.
-- **DialogueRunner** (`scripts/npcs/dialogue_runner.gd`) -- Typewriter text box at bottom of screen. Instantiated by NPCs, not an autoload. Emits `dialogue_finished`.
-- Dialogue data at `data/dialogue/*.json`. Format: conversations array with conditions (flag_not_set, has_ability, quest_active, quest_completed).
+- **NPC** (`scripts/npcs/npc_controller.gd`, `scenes/npcs/npc.tscn`) -- Interaction zone, loads dialogue from JSON, shows an "E" prompt. `@export`: npc_id, display_name, dialogue_file, body_color, is_shopkeeper. Placed: Elder (room_01), Garden Spirit (room_07). An NPC with `is_shopkeeper = true` opens `scenes/ui/shop.tscn` when its dialogue ends; `data/dialogue/shopkeeper.json` ships but no shopkeeper NPC is placed.
+- **DialogueRunner** (`scripts/npcs/dialogue_runner.gd`) -- Typewriter text box at the bottom of the screen. Instantiated by NPCs, not an autoload. Emits `dialogue_finished`.
+- Dialogue data in `data/dialogue/*.json`: a conversations array with conditions (flag_not_set, has_ability, quest_active, quest_completed).
 
-### UI
-- **MainMenu** (`scenes/ui/main_menu.tscn`) -- New Game / Continue / Quit. Shows controls.
-- **HUD** (`scenes/ui/hud.tscn`) -- Heart containers (Polygon2D), coin counter, controls hint at bottom.
-- **PauseMenu** (`scenes/ui/pause_menu.tscn`) -- Resume / Restart / Main Menu.
+### UI (`scenes/ui/`, scripts in `scripts/ui/`)
+- **HUD** (`hud.tscn`) -- Hearts (Polygon2D), coin counter, controls hint at the bottom. `hud.gd` reads its nodes as `%HeartsContainer`, `%CoinsLabel`, `%ControlsHint`, `%HealthLabel`; those four nodes carry `unique_name_in_owner = true` in `hud.tscn`. Keep both sides in sync: a `%Name` whose node lacks the flag is a runtime error on every boot.
+- **PauseMenu** (`pause_menu.tscn`) -- Resume / Quest Journal / Map / Restart / Main Menu. Loads `quest_journal.tscn` and `map.tscn` on demand.
+- **QuestJournal**, **Map**, **Shop**, **MainMenu**, **GameOver**.
+- Legacy, unreachable from the room flow: `level_select`, `victory`, `level_complete` (`level_select.gd` reads `GameManager.levels`, which does not exist).
 
 ### Collision Layers
 | Layer | Name | Value | Used By |
 |-------|------|-------|---------|
-| 1 | World | 1 | Platforms, walls |
+| 1 | World | 1 | Platforms, walls, NPC bodies |
 | 2 | Player | 2 | Player CharacterBody2D |
-| 3 | Enemies | 4 | Enemy CharacterBody2Ds |
+| 3 | Enemies | 4 | Enemy and boss CharacterBody2Ds |
 | 4 | PlayerAttack | 8 | Player sword hitbox |
-| 5 | EnemyAttack | 16 | Enemy projectiles/attacks |
-| 6 | Interactable | 32 | NPCs, doors, pickups |
+| 5 | EnemyAttack | 16 | Reserved; no shipped scene uses it |
+| 6 | Interactable | 32 | Reserved; doors, benches, pickups and NPC zones are Area2Ds on layer 0 with mask 2 |
 
-### Current Room Layout
+### Room Layout (as shipped)
 ```
-Room 01 (hub) -- Room 02 (Mossy Grotto, has Dash pickup)
+room_02 Mossy Grotto ---- room_01 Forgotten Approach (hub) ---- room_03 ---- room_07
+(dash pickup)             (Elder NPC, bench, patrol enemy)      (enemies)    (Garden Spirit NPC)
      |
-Room 03 (Crystal Caves)
+room_04 Fungal Depths ---- room_05 ---- room_06
+(wall_climb pickup,        (moving       (Crystal Queen boss arena)
+ crumbling platforms)       platforms)
 ```
-Only 3 rooms exist. 4 more are planned.
 
-## What Needs To Be Built
+| Room | Doors |
+|------|-------|
+| room_01 | door_spawn (start), door_left -> room_02, door_right -> room_03 |
+| room_02 | door_right -> room_01, door_left -> room_04 |
+| room_03 | door_left -> room_01, door_right -> room_07 |
+| room_04 | door_up -> room_02, door_left -> room_05 |
+| room_05 | door_left -> room_04, door_right -> room_06 |
+| room_06 | door_left -> room_05 |
+| room_07 | door_left -> room_03 |
 
-### Priority 1: More Rooms (4 new rooms)
+The world is fully open: no door requires an ability and no AbilityGate is placed. Gating is yours to add. The HUD level label and the pause menu "Area" line are static text ("Forgotten Approach") in every room.
 
-Each room is a .tscn scene file following this structure:
+## Adding a Room
+
+Each room is a .tscn following this structure:
 ```
 RoomXX (Node2D, script=room_loader.gd, room_id="room_XX")
   ParallaxBg (ParallaxBackground, script=parallax_bg.gd)
@@ -86,103 +103,47 @@ RoomXX (Node2D, script=room_loader.gd, room_id="room_XX")
     DoorXX (instance of door.tscn, with door_id, target_room_id, target_door_id)
   Enemies (Node2D)
   Coins (Node2D)
-  Collectibles (Node2D)
   DeathPlane (Area2D, killzone script, at y=700)
   HUD (instance of hud.tscn)
   PauseMenu (instance of pause_menu.tscn)
 ```
 
 **CRITICAL RULES for rooms:**
-- Player is NOT in the room scene. RoomManager spawns it.
-- Register room path in `room_manager.gd` `room_paths` dictionary.
-- All Color() values in .tscn must have 4 components: `Color(r, g, b, a)` not `Color(r, g, b)`.
-- Sub-resources ([sub_resource]) must come BEFORE nodes in .tscn files.
-- Ext-resources ([ext_resource]) must come before sub-resources.
+- The player is NOT in the room scene. RoomManager spawns it at the door.
+- Register the room path in `room_manager.gd` `room_paths`, and give every door a matching `target_door_id` on the other side.
+- All Color() values in .tscn must have 4 components: `Color(r, g, b, a)`, not `Color(r, g, b)`.
+- `[ext_resource]` blocks come before `[sub_resource]` blocks, which come before nodes.
 - Platform top surface = StaticBody2D position. CollisionShape2D offset by (0, half_height). Polygon2D draws downward from 0.
-- Platforms should be reachable: single jump height is ~88px, double jump adds ~65px. Keep platform gaps under 150px vertical.
-
-**Planned rooms:**
-| Room | Theme | Content |
-|------|-------|---------|
-| room_04 | Fungal Depths | Dash-gated entry, wall_climb ability pickup, crumbling platforms, quest item |
-| room_05 | Ancient Aqueduct | wall_climb-gated entry, vertical section, moving platforms, shopkeeper NPC |
-| room_06 | Queen's Chamber | Boss fight arena |
-| room_07 | Hidden Garden | Secret room, double_jump-gated, ending NPC, reward coins |
-
-### Priority 2: Boss Fight
-
-Create at `scripts/bosses/crystal_queen.gd` + `scenes/bosses/crystal_queen.tscn`.
-
-Requirements:
-- Extend CharacterBody2D (not base_enemy, bosses are special)
-- State machine: IDLE, TELEGRAPH, ATTACK, RECOVER, DYING
-- 20 HP, contact_damage = 2
-- Phase 1 (100-50% HP): charge attack, crystal rain (falling projectiles), slam
-- Phase 2 (<50% HP): faster attacks, crystal wall (spawns temporary obstacles)
-- Recovery windows between attacks (1-2s) where player can hit
-- Telegraph attacks with visual indicator (flash, shake) before executing
-- Death: doors unlock, ability pickup spawns, quest completes
-- Health bar UI at top of screen (CanvasLayer, ColorRect fill bar)
-
-Room_06 should:
-- Lock doors on boss room entry
-- Flat arena floor with 2 platforms for dodging
-- Boss spawns from center with name title card
-- On death: unlock doors, spawn reward
-
-### Priority 3: Quest Journal UI
-
-Create `scripts/ui/quest_journal.gd` + `scenes/ui/quest_journal.tscn`.
-
-- Opened from pause menu (add "Journal" button to pause_menu.tscn)
-- Lists active quests with current objective
-- Lists completed quests (greyed)
-- QuestManager already has `get_active_quests()`, `get_completed_quests()`, and `quest_data` dictionary with title/description/objectives
-
-### Priority 4: Room Map
-
-Create `scripts/ui/map.gd` + `scenes/ui/map.tscn`.
-
-- Grid of colored rectangles representing rooms
-- Visited rooms colored, unvisited hidden/dark
-- Current room highlighted with a border
-- Room connections shown as lines between rectangles
-- Room positions from a const Dictionary in the script
-- Opened with a "Map" button in pause menu or a key
-
-### Priority 5: Wall Climb Ability Pickup
-
-The wall_climb ability exists in AbilityManager but there's no pickup for it yet. Place it in room_04. Same pattern as the Dash pickup in room_02.
-
-### Priority 6: Additional Quest Data
-
-Create more quest JSON files at `data/quests/`:
-- `defeat_queen.json`: Kill boss in room_06. Reward: game completion flag.
-- `fungal_harvest.json`: Fetch item from room_04, return to Elder. Reward: coins + door unlock.
-
-### Priority 7: Shopkeeper
-
-The shopkeeper NPC dialogue exists at `data/dialogue/shopkeeper.json`. Place a shopkeeper NPC in room_05. For the actual shop UI:
-- Create `scripts/ui/shop.gd` + `scenes/ui/shop.tscn`
-- Items: health upgrade (+1 max HP, 50 coins), attack charm (+1 sword damage, 30 coins)
-- GameManager already has `increase_max_hp()` and coins tracking
+- Platforms must be reachable: single jump height is ~88px, double jump adds ~65px. Keep vertical gaps under 150px.
 
 ## Code Conventions
 
 - GDScript, fully typed: `var speed: float = 5.0`, `func move(delta: float) -> void:`
 - `@export` for all tunable values, grouped with `@export_group()`
-- `@onready` for node references
+- `@onready` for node references. `%Name` requires `unique_name_in_owner = true` on that node in the scene.
 - Groups for detection: `"player"`, `"enemies"`, `"doors"`, `"npcs"`
-- `has_method()` for duck typing instead of `is ClassName` (class_name resolution is unreliable in Godot 4.5)
-- No external assets. All visuals via Polygon2D, CPUParticles2D, code-drawn shapes
-- Event-driven: emit EventBus signals, listen in other systems. Never directly reference nodes across systems.
-- process_mode = PROCESS_MODE_ALWAYS on any node that must work during pause (UI, transitions)
+- `has_method()` for duck typing instead of `is ClassName`, so systems stay decoupled and do not depend on class_name resolution
+- No external assets beyond the two background PNGs. Visuals are Polygon2D, CPUParticles2D and code-drawn shapes
+- Event-driven: emit EventBus signals, listen in other systems. Never reference nodes directly across systems.
+- `process_mode = PROCESS_MODE_ALWAYS` on any node that must work during pause (UI, transitions)
 
 ## How To Test
 
-Launch: `/Applications/Godot.app/Contents/MacOS/Godot --path /Users/MathiasWork/development/templates/template-2d-platformer 2>&1`
-Headless validation: add `--headless --quit` flags.
-Check for zero errors in console output.
+Projects created with `summer create 2d-platformer <dir>` get `tests/autopilot/` (README, `autopilot.gd`, `probe_base.gd`, `run.sh`). From the project root:
+
+```
+bash tests/autopilot/run.sh
+```
+
+That boots the game in the engine's offscreen verify mode (no editor window, real renderer), walks the player through two waypoints in room_01, saves frames to `tests/autopilot/out/`, and exits non-zero if the engine logged any ERROR or WARNING. A pristine project must exit 0 with `"errors_seen": []`. Agents can run the same probe through the `RunVerification` op (see `tests/autopilot/README.md`).
+
+Inside this template repository (which has no `tests/autopilot/`), the cheapest smoke test is a headless first frame; it prints every `_ready()` error and exits:
+
+```
+/Applications/Summer.app/Contents/MacOS/Summer --disable-crash-handler --path . --headless --quit
+```
+
+(Windows: `%LOCALAPPDATA%\Summer\current\Summer.exe`.) There is no `godot` binary on a Summer install; do not substitute one. Zero `ERROR:` lines is the bar.
 
 ## Input Actions (defined in project.godot)
 
@@ -196,3 +157,11 @@ Check for zero errors in console output.
 | attack | X, J | X button |
 | interact | E | Y button |
 | pause | Escape | Start |
+
+## Known Gaps
+
+- No shopkeeper NPC is placed, so the shop UI is unreachable in the shipped rooms.
+- No ability gate or ability-locked door is placed; double_jump, down_attack and charged_attack have no pickup.
+- The HUD level label and the pause menu "Area" text are static in every room.
+- AudioManager is a stub with no audio files.
+- `scenes/levels/`, the level_select / victory / level_complete UI and the gem / checkpoint / bounce_pad / one_way_platform / level_end systems are legacy linear-platformer content that nothing loads.

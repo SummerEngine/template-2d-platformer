@@ -40,7 +40,6 @@ func _create_image_layer() -> void:
 	rect.texture = background_texture
 	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	rect.size = Vector2(1920, 1080)
 	canvas.add_child(rect)
 
 

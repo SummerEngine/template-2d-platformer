@@ -1,109 +1,109 @@
-# 2D Platformer Template
+# 2D Metroidvania Template
 
-A tight, responsive 2D platformer template for Summer Engine (Godot 4.6). Polished movement feel with coyote time, variable jump height, screen shake, hitstop, squash/stretch, and stomp-to-kill enemies.
+A Hollow Knight-inspired 2D Metroidvania starter for Summer Engine (a Godot 4.6+ fork): a tuned platformer controller with melee combat, seven interconnected rooms, ability pickups, NPCs with dialogue, quests, a boss fight and a save system. The game boots straight into gameplay in `scenes/rooms/room_01.tscn`. Everything is drawn with `Polygon2D` and `CPUParticles2D` except two background PNGs, so it is easy to reskin.
+
+Create a project from it with the Summer toolkit:
+
+```
+summer create 2d-platformer my-game
+cd my-game
+bash tests/autopilot/run.sh   # boots the game offscreen; must exit 0 with no engine errors
+```
 
 ## Controls
 
 | Action | Keyboard | Gamepad |
 |--------|----------|---------|
-| Move | A/D or Arrow Keys | Left Stick |
-| Jump | Space, W, or Up Arrow | A Button |
+| Move | A / D or Left / Right | Left stick |
+| Jump (hold for height; press again in the air to double jump) | Space, W or Up | A |
+| Aim down (down attack in the air) | S or Down | Left stick down |
+| Dash | Shift | RB |
+| Attack (3-hit combo, up / down / forward) | X or J | X |
+| Interact (NPCs, benches, pickups, doors) | E | Y |
 | Pause | Escape | Start |
-
-**Jump mechanics:**
-- Tap for short hop, hold for full jump (variable height)
-- Jump works briefly after leaving a ledge (coyote time)
-- Press jump slightly before landing and it still registers (jump buffering)
-- Faster fall than rise (asymmetric gravity) for snappy, weighty arcs
 
 ## What's Included
 
-**Player:**
-- Full controller with coyote time, jump buffer, variable jump height, asymmetric gravity
-- Turn boost (snappier direction changes), squash/stretch, landing/jump particles
-- Stomp-to-kill enemies with bounce, invincibility on hit with knockback + flash
-- Death/respawn with checkpoint support
+**Player** (`scripts/player/player_controller.gd`, `scripts/combat/player_combat.gd`)
+- Run, jump with coyote time, jump buffer and variable height, asymmetric gravity, double jump, wall slide and wall jump, 8-direction dash with cooldown, stomp-to-kill
+- Sword combo with directional attacks; the down attack bounces you off enemies
+- Hearts-based HP with invincibility frames and knockback, death and bench respawn
+- Squash/stretch, landing and jump particles, screen shake and hitstop on impacts
 
-**Enemies:**
-- **Patrol Enemy** -- walks back and forth, turns at edges/walls, stompable (with flatten + death particles)
-- **Flying Enemy** -- sine-wave flight pattern, wing flap animation, spin death on stomp
+**Abilities** (`scripts/autoloads/ability_manager.gd`)
+- dash, wall_climb, double_jump, down_attack, charged_attack tracked and saved
+- Pickups placed for dash (room_02) and wall climb (room_04); dash is also granted at boot so the first room is fully traversable
+- `AbilityGate` and `Door.requires_ability` are ready for gating; the shipped world is fully open
 
-**Systems:**
-- Collectible coins with bob animation and collect pop (+100 floating text)
-- Moving platforms (smooth sinusoidal motion, player rides automatically)
-- Bounce pads that launch the player with elastic visual feedback
-- Checkpoints that update spawn position (flag turns green)
-- Spike hazards and death plane (falling off map)
-- Screen shake and hitstop on impacts
-- Floating score text on coin collect and enemy kill
-- Procedural parallax background (stars + mountain layers)
-- Celebration particles on level complete
+**World** -- 7 rooms in `scenes/rooms/`, connected by doors and managed by `RoomManager` + `SceneTransition`
+- room_01 hub (Elder NPC, bench, patrol enemy) -- room_02 Mossy Grotto (dash pickup, enemies) -- room_04 Fungal Depths (wall-climb pickup, crumbling platforms) -- room_05 (moving platforms, flying enemies) -- room_06 (Crystal Queen boss arena)
+- room_01 -- room_03 (patrol and flying enemies) -- room_07 (Garden Spirit NPC)
 
-**UI:**
-- Main menu (Start, Quit)
-- HUD (lives, coins, score)
-- Pause menu (Resume, Restart, Main Menu)
-- Game over screen (Try Again, Main Menu)
-- Level complete overlay with scale pop animation
+**Enemies and boss**
+- Patrol enemy (turns at edges and walls, player detector), flying enemy (sine-wave flight)
+- Crystal Queen boss with a state machine, telegraphed attacks and a health bar
 
-**Two playable levels:**
-- Level 1: Tutorial -- gentle ramp with platforms, spikes, coins, enemies, checkpoint, bounce pad
-- Level 2: Challenge -- vertical platforming, moving platforms, flying enemies, multiple checkpoints, spikes
+**NPCs, quests, shop, saves**
+- NPCs with JSON dialogue (`data/dialogue/`) and a typewriter dialogue box; Elder and Garden Spirit are placed
+- Quests from `data/quests/` (Explore the Grotto, Fungal Harvest, Defeat the Crystal Queen) with a quest journal
+- Shop UI (`scenes/ui/shop.tscn`) opened by an NPC flagged `is_shopkeeper`; the shopkeeper dialogue ships, the NPC itself is not placed yet
+- Benches heal, save and set your respawn point; `SaveManager` persists abilities, rooms, quests, HP and coins to `user://save_data.json`
+
+**UI**
+- HUD (hearts, coins, controls hint), pause menu (Resume / Quest Journal / Map / Restart / Main Menu), room map, quest journal, shop, main menu, game over, dialogue box
 
 ## Project Structure
 
 ```
 scripts/
-  autoloads/          # EventBus, GameManager
-  player/             # PlayerController, CameraController (shake + hitstop)
-  enemies/            # PatrolEnemy, FlyingEnemy
-  systems/            # Coin, Killzone, LevelEnd, MovingPlatform, BouncePad,
-                      # Checkpoint, ParallaxBg, FloatingText, JuiceManager
-  ui/                 # MainMenu, HUD, PauseMenu, GameOver, LevelComplete
+  autoloads/   EventBus, AbilityManager, RoomManager, GameManager, QuestManager,
+               SaveManager, SceneTransition, AudioManager
+  player/      PlayerController, CameraController
+  combat/      PlayerCombat, HitArea2D, HurtArea2D
+  enemies/     BaseEnemy, PatrolEnemy, FlyingEnemy
+  bosses/      CrystalQueen
+  npcs/        NPCController, DialogueRunner
+  systems/     Door, Bench, AbilityPickup, AbilityGate, Coin, Killzone, CrumblingPlatform,
+               MovingPlatform, RoomLoader, ParallaxBg, JuiceManager, FloatingText
+               (+ legacy BouncePad, OneWayPlatform, Checkpoint, Gem, LevelEnd)
+  ui/          HUD, PauseMenu, QuestJournal, Map, Shop, MainMenu, GameOver
+               (+ legacy LevelSelect, Victory, LevelComplete)
 scenes/
-  player/             # Player scene
-  enemies/            # PatrolEnemy, FlyingEnemy scenes
-  systems/            # Coin, Checkpoint, BouncePad scenes
-  levels/             # Level 01, Level 02
-  ui/                 # UI scenes
+  rooms/       room_01 .. room_07
+  player/ enemies/ bosses/ npcs/ doors/ systems/ ui/
+  levels/      legacy linear levels; nothing in the game loads them
+data/
+  dialogue/    elder, garden_spirit, shopkeeper
+  quests/      explore_grotto, fungal_harvest, defeat_queen
+assets/sprites/  background.png, menu_bg.png
 ```
 
 ## Collision Layers
 
 | Layer | Name | Value | Used By |
 |-------|------|-------|---------|
-| 1 | World | 1 | Platforms, ground |
-| 2 | Player | 2 | Player character |
-| 3 | Enemies | 4 | Patrol/Flying enemies |
+| 1 | World | 1 | Platforms, walls, NPC bodies |
+| 2 | Player | 2 | Player |
+| 3 | Enemies | 4 | Enemies and the boss |
+| 4 | PlayerAttack | 8 | Player sword hitbox |
+
+Interactables (doors, benches, pickups, NPC zones) are Area2Ds on layer 0 that detect layer 2.
 
 ## How to Extend
 
-**Add a new level:**
-1. Duplicate `scenes/levels/level_01.tscn`
-2. Rearrange platforms, enemies, coins, checkpoints
-3. Add the path to `GameManager.levels` array
+**Add a room:** duplicate a room scene, keep `room_loader.gd` on the root and set `room_id`, add door pairs (`door_id` / `target_room_id` / `target_door_id` on both sides), and register the path in `scripts/autoloads/room_manager.gd` `room_paths`. Never place the player in a room scene; RoomManager spawns it at the door.
 
-**Add a new enemy type:**
-1. Create script in `scripts/enemies/` extending `CharacterBody2D`
-2. Implement `stomp()` method for player stomping
-3. Add a `PlayerDetector` Area2D (collision_mask = 2) that calls `body.take_damage()`
-4. Set collision_layer = 4, collision_mask = 1
+**Gate progress:** set `requires_ability` on a door or put `scenes/systems/ability_gate.tscn` in the way, then add a pickup with the matching `ability_name`.
 
-**Tune the feel:**
-All parameters are `@export` on PlayerController. Key ones:
-- `max_speed` (280), `acceleration` (1800), `friction` (2400) -- ground movement
-- `jump_velocity` (-440), `gravity_up` (1100), `gravity_down` (1400) -- jump arc
-- `coyote_time` (0.08), `jump_buffer_time` (0.1) -- input forgiveness
-- `landing_squash`, `jump_stretch` -- visual feedback intensity
-- `turn_boost` (1.6) -- direction change snappiness
+**Add an enemy:** extend `scripts/enemies/base_enemy.gd`, override `_setup()` and `_ai_process(delta)`; collision layer 4, mask 1.
 
-**Add audio:**
-Hook into EventBus signals in a new AudioManager autoload:
-- `player_jumped` -- jump sound
-- `player_landed` -- landing thud
-- `coin_collected` -- pickup chime
-- `enemy_stomped` -- stomp impact
-- `enemy_killed` -- defeat sound
+**Tune the feel:** everything is `@export` on PlayerController: `max_speed` (280), `acceleration` (1800), `friction` (2400), `jump_velocity` (-440), `gravity_up` (1100), `gravity_down` (1400), `coyote_time` (0.08), `jump_buffer_time` (0.1), `dash_speed` (480), `wall_jump_velocity` (320, -400), `landing_squash`, `jump_stretch`, `turn_boost` (1.6).
+
+**Add audio:** `AudioManager` has the crossfade and SFX plumbing; assign streams and hook EventBus signals such as `player_jumped`, `player_landed`, `coin_collected`, `enemy_killed`, `player_attacked`.
+
+## Verifying a Change
+
+`bash tests/autopilot/run.sh` in a created project drives the player through room_01 offscreen and fails on any engine error or warning. Keep it green. Agent-facing detail lives in `CLAUDE.md`.
 
 ## License
 
