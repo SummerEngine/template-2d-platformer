@@ -1,8 +1,31 @@
+![2D Metroidvania Template](docs/cover.jpg)
+
 # 2D Metroidvania Template
 
-A Hollow Knight-inspired 2D Metroidvania starter for Summer Engine (a Godot 4.6+ fork): a tuned platformer controller with melee combat, seven interconnected rooms, ability pickups, NPCs with dialogue, quests, a boss fight and a save system. The game boots straight into gameplay in `scenes/rooms/room_01.tscn`. Everything is drawn with `Polygon2D` and `CPUParticles2D` except two background PNGs, so it is easy to reskin.
+A 2D Metroidvania starter for Summer Engine (a Godot 4.6+ fork): a tuned platformer controller with melee combat, seven interconnected rooms, ability pickups, NPCs with dialogue, quests, a boss fight and a save system. The game boots straight into gameplay in `scenes/rooms/room_01.tscn`. Everything is drawn with `Polygon2D` and `CPUParticles2D` except two background PNGs, so it is easy to reskin.
 
-Create a project from it with the Summer toolkit:
+## What's inside
+
+- **Tight movement**: coyote time, jump buffer, double jump, wall slide and wall jump, 8-direction dash.
+- **Melee combat**: a 3-hit sword combo with up, down and forward attacks, hitstop and screen shake.
+- **Seven connected rooms** with dash and wall-climb ability pickups.
+- **Enemies and a boss**: patrol and flying enemies, and the Crystal Queen with telegraphed attacks.
+- **NPCs, quests and a shop**: JSON dialogue, a quest journal and benches that heal and save.
+- **Full UI set**: HUD, pause menu, room map, quest journal, shop, main menu and game over.
+
+## Get started
+
+1. Download this repo as a [ZIP](https://github.com/SummerEngine/template-2d-platformer/archive/refs/heads/main.zip) or clone it.
+2. Open the folder in [Summer Engine](https://www.summerengine.com/download).
+3. Press Play.
+
+Summer's AI agent can extend the game for you. Try:
+
+- "Add an eighth room behind a wall-climb gate with a new flying enemy."
+- "Place the shopkeeper NPC in the hub and sell a heart upgrade."
+- "Give the Crystal Queen a second phase with a crystal rain attack."
+
+Or create a project from it with the Summer toolkit:
 
 ```
 summer create 2d-platformer my-game
